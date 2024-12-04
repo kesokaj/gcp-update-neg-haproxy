@@ -46,7 +46,7 @@ for ZONE in $ZONES; do
       sed 's/[[:space:]]\+/:/g')
     for ENDPOINT in $ENDPOINTS; do
       ENDPOINT_HASH=$(echo -n "$ENDPOINT" | md5sum | awk '{print $1}')
-      echo "  $ENDPOINT_HASH $ENDPOINT check" >> $HAPROXY_CFG_TMP
+      echo "  server $ENDPOINT_HASH $ENDPOINT check" >> $HAPROXY_CFG_TMP
     done
 done
 
