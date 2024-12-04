@@ -45,7 +45,7 @@ for ZONE in $ZONES; do
       --format="value(IP_ADDRESS,PORT)" 2>/dev/null | \
       sed 's/[[:space:]]\+/:/g')
     for ENDPOINT in $ENDPOINTS; do
-      ENDPOINT_HASH=$(echo -n "$ENDPOINT" | md5sum | awk '{print $1}')
+      ENDPOINT_HASH=$(echo "$ENDPOINT" | md5sum | awk '{print $1}')
       echo "  server $ENDPOINT_HASH $ENDPOINT check" >> $HAPROXY_CFG_TMP
     done
 done
