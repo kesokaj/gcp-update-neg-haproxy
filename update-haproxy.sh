@@ -17,7 +17,7 @@ global
   stats timeout 30s  
 
 defaults
-  mode http
+  mode tcp
   timeout connect 5s
   timeout client 30s
   timeout server 60s
