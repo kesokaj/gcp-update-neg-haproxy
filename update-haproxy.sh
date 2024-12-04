@@ -50,26 +50,25 @@ for ZONE in $ZONES; do
     done
 done
 
+# Always check if HAProxy is running and start it if needed
+if ! systemctl is-active --quiet haproxy; then
+  echo "HAProxy is not running. Starting it..."
+  if ! systemctl start haproxy; then
+    echo "Error starting HAProxy!"
+    exit 1  # Or handle the error appropriately
+  fi
+fi
+
 # Compare configuration files
 if ! cmp -s $HAPROXY_CFG $HAPROXY_CFG_TMP; then
   echo "HAProxy configuration files differ. Updating..."
   mv $HAPROXY_CFG_TMP $HAPROXY_CFG
 
-  # Check if HAProxy is running
-  if ! systemctl is-active --quiet haproxy; then
-    echo "HAProxy is not running. Starting it..."
-    if ! systemctl start haproxy; then
-      echo "Error starting HAProxy!"
-      exit 1  # Or handle the error appropriately
-    fi
-  fi
-
-  # Reload HAProxy configuration
+  # Reload HAProxy configuration since it was already running and config changed
   if ! systemctl reload haproxy; then
     echo "Error reloading HAProxy!"
     exit 1  # Or handle the error appropriately
   fi
-
   echo "HAProxy reloaded."
 else
   echo "HAProxy configuration files are identical. No changes made."
