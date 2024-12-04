@@ -8,7 +8,6 @@ NEG=$(curl -sH "Metadata-Flavor: Google" http://metadata.google.internal/compute
 HAPROXY_CFG="/etc/haproxy/haproxy.cfg"
 HAPROXY_CFG_TMP="/etc/haproxy/haproxy.cfg.tmp"
 ZONES=$(gcloud compute zones list --filter=region=$REGION --format="value(NAME)")
-ENDPOINT_NUMBER=1
 
 cat > $HAPROXY_CFG_TMP <<EOF
 global
@@ -19,16 +18,16 @@ global
 
 defaults
   mode http
-  timeout connect 5000ms
-  timeout client 50000ms
-  timeout server 50000ms
+  timeout connect 5s
+  timeout client 30s
+  timeout server 60s
 
 listen stats
   bind *:3000
   stats enable
   stats uri /
   stats hide-version
-  stats refresh 5s
+  stats refresh 2s
 
 frontend front
   bind  *:80
@@ -46,8 +45,8 @@ for ZONE in $ZONES; do
       --format="value(IP_ADDRESS,PORT)" 2>/dev/null | \
       sed 's/[[:space:]]\+/:/g')
     for ENDPOINT in $ENDPOINTS; do
-      echo "  server endpoint$ENDPOINT_NUMBER $ENDPOINT check inter 3s fall 3 rise 2" >> $HAPROXY_CFG_TMP
-      ENDPOINT_NUMBER=$((ENDPOINT_NUMBER+1))
+      ENDPOINT_HASH=$(echo -n "$ENDPOINT" | md5sum | awk '{print $1}')
+      echo "  $ENDPOINT_HASH $ENDPOINT check" >> $HAPROXY_CFG_TMP
     done
 done
 
