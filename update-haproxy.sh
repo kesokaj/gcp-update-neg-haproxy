@@ -12,12 +12,12 @@ ZONES=$(gcloud compute zones list --filter=region=$REGION --format="value(NAME)"
 cat > $HAPROXY_CFG_TMP <<EOF
 global
   daemon
-  maxconn 100000
+  maxconn 500000
   stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
   stats timeout 30s  
 
 defaults
-  mode tcp
+  mode http
   timeout connect 5s
   timeout client 30s
   timeout server 60s
@@ -31,9 +31,11 @@ listen stats
 
 frontend front
   bind  *:80
+  mode tcp
   default_backend back
 
 backend back
+  mode tcp
   timeout queue 30s
   balance roundrobin
 EOF
